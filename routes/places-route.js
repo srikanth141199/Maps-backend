@@ -1,6 +1,6 @@
 import express from "express";
 import HttpError from "../models/http-error.js";
-import { createPlace, deletePlace, getPlaceByUserId, getPlacesById, updatePlace } from "../controllers/places-controller.js";
+import { createPlace, deletePlace, getPlacesByUserId, getPlacesById, updatePlace } from "../controllers/places-controller.js";
 
 
 
@@ -13,7 +13,7 @@ router.get("/", (req, res, next) => {
 
 router.get("/:pid", getPlacesById)
 
-router.get("/user/:uid", getPlaceByUserId);
+router.get("/user/:uid", getPlacesByUserId);
 
 router.post("/", createPlace);
 

@@ -84,11 +84,11 @@ export const getPlacesById = (req, res, next) => {
     res.json({place});
 };
 
-export const getPlaceByUserId = (req, res, next) => {
+export const getPlacesByUserId = (req, res, next) => {
     const userId = req.params.uid;
-    const place = Dummy_Places.find(ele => ele.creator === userId);
+    const places = Dummy_Places.filter(ele => ele.creator === userId);
 
-    if(!place){
+    if(!places || places.length === 0){
         // res.status(404).json({message : "Could not provide place to given user id"})
         // return;
 
@@ -98,7 +98,7 @@ export const getPlaceByUserId = (req, res, next) => {
 
         return next(new HttpError("Could not provide place to given user id", 404))
     }
-    res.json({place})
+    res.json({places})
 }
 
 export const createPlace = (req, res, next) => {
