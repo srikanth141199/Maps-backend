@@ -1,5 +1,6 @@
 import express from "express";
 import HttpError from "../models/http-error.js";
+import { getUsers, login, signup } from "../controllers/users-controller.js";
 
 const Dummy_Places = [
     {
@@ -66,6 +67,12 @@ const Dummy_Places = [
 
 const router = express.Router();
 
+
+router.get("/", getUsers);
+
+router.post("/signup", signup);
+
+router.post("/login", login);
 
 
 export default router;
