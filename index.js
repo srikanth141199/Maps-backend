@@ -7,6 +7,8 @@ import UserRouters from "./routes/users-route.js";
 
 const app = express();
 
+app.use(bodyParser.json());
+
 app.use("/api/places",PlacesRouters);
 app.use("/api/users", UserRouters);
 

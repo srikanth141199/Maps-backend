@@ -1,5 +1,5 @@
-import express from "express";
 import HttpError from "../models/http-error.js";
+import {v4 as uuidv4} from "uuid";
 
 const Dummy_Places = [
     {
@@ -64,8 +64,55 @@ const Dummy_Places = [
     }
 ];
 
-const router = express.Router();
+export const getPlacesById = (req, res, next) => {
+    const placeId = req.params.pid
+    const place = Dummy_Places.find( place => place.id === placeId);
 
+    if(!place){
+        // res.status(404).json({message : "Could not provide place to given id"})
+        // return;
 
+        // const error = new Error("Could not provide place to given place id");
+        // error.code = 404;
+        // throw error;
 
-export default router;
+        //3rd way of handling error
+
+        throw new HttpError("Could not provide place to given place id", 404);
+    }
+
+    res.json({place});
+};
+
+export const getPlaceByUserId = (req, res, next) => {
+    const userId = req.params.uid;
+    const place = Dummy_Places.find(ele => ele.creator === userId);
+
+    if(!place){
+        // res.status(404).json({message : "Could not provide place to given user id"})
+        // return;
+
+        // const error = new Error("Could not provide place to given user id");
+        // error.code = 404;
+        // return next(error);
+
+        return next(new HttpError("Could not provide place to given user id", 404))
+    }
+    res.json({place})
+}
+
+export const createPlace = (req, res, next) => {
+    const {title, description, coordinates, imageUrl, address, creator} = req.body;
+    const createdPlace = {
+        id: uuidv4(),
+        title : title,
+        description : description,
+        location : coordinates,
+        address : address,
+        creator : creator
+    };
+
+    Dummy_Places.push(createdPlace);
+
+    res.status(201).json({place : createdPlace});
+}
