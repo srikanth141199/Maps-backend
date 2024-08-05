@@ -1,11 +1,13 @@
 import express from "express";
 import HttpError from "../models/http-error.js";
-import { createPlace, deletePlace, getPlacesByUserId, getPlacesById, updatePlace } from "../controllers/places-controller.js";
+import { createPlace, deletePlace, getPlacesByUserId, getPlacesById, updatePlace, getPlaces } from "../controllers/places-controller.js";
 import { check } from "express-validator";
 
 
 
 const router = express.Router();
+
+router.get("/allPlaces", getPlaces)
 
 router.get("/", (req, res, next) => {
     console.log("Get request in places");

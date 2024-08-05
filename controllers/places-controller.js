@@ -1,6 +1,7 @@
 import { validationResult } from "express-validator";
 import HttpError from "../models/http-error.js";
 import {v4 as uuidv4} from "uuid";
+import { getCoordsForAddress } from "../util/location.js";
 
 let Dummy_Places = [
     {
@@ -65,6 +66,10 @@ let Dummy_Places = [
     }
 ];
 
+export const getPlaces = (req, res, next) => {
+    res.status(200).json({places : Dummy_Places});
+}
+
 export const getPlacesById = (req, res, next) => {
     const placeId = req.params.pid
     const place = Dummy_Places.find( place => place.id === placeId);
@@ -102,15 +107,24 @@ export const getPlacesByUserId = (req, res, next) => {
     res.json({places})
 }
 
-export const createPlace = (req, res, next) => {
+export const createPlace = async (req, res, next) => {
     const error = validationResult(req);
 
     if(!error.isEmpty()){
         console.log(error);
-        throw new HttpError("Invalid Input", 422);
+        return next(new HttpError("Invalid Input", 422));
     }
      
-    const {title, description, coordinates, imageUrl, address, creator} = req.body;
+    const {title, description, imageUrl, address, creator} = req.body;
+
+    let coordinates;
+
+    try {
+        coordinates = await getCoordsForAddress(address);     
+    } catch (error) {
+        return next(error);
+    }
+
     const createdPlace = {
         id: uuidv4(),
         title : title,
