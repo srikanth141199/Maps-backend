@@ -1,6 +1,6 @@
 import express from "express";
 import HttpError from "../models/http-error.js";
-import { createPlace, getPlaceByUserId, getPlacesById } from "../controllers/places-controller.js";
+import { createPlace, deletePlace, getPlaceByUserId, getPlacesById, updatePlace } from "../controllers/places-controller.js";
 
 
 
@@ -17,6 +17,7 @@ router.get("/user/:uid", getPlaceByUserId);
 
 router.post("/", createPlace);
 
-
+router.patch("/:pid", updatePlace);
+router.delete("/:pid", deletePlace);
 
 export default router;
