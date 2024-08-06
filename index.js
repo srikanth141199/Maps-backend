@@ -1,5 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
+import mongoose from "mongoose";
 
 import PlacesRouters from "./routes/places-route.js";
 import UserRouters from "./routes/users-route.js";
@@ -27,6 +28,14 @@ app.use((error, req, res, next) => {
     res.json({message : error.message || "An unknown error occurring" });
 })
 
-app.listen(5000, ()=>{
-    console.log("app is listening in port 5000")
-})
+mongoose
+  .connect("mongodb+srv://kolleparasrikanth:Srikanth5359$@ecomdb.ndaljpt.mongodb.net/places")
+  .then(() => {
+    app.listen(5000, () => {
+      console.log("app is listening in port 5000");
+    });
+  })
+  .catch(err => {
+    console.log(err);
+  });
+
