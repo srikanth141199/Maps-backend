@@ -67,13 +67,23 @@ let Dummy_Places = [
     }
 ];
 
-export const getPlaces = (req, res, next) => {
-    res.status(200).json({places : Dummy_Places});
+export const getPlaces = async (req, res, next) => {
+
+    const places = await PlaceModal.find();
+    res.status(200).json({places : places});
 }
 
-export const getPlacesById = (req, res, next) => {
+export const getPlacesById = async (req, res, next) => {
     const placeId = req.params.pid
-    const place = Dummy_Places.find( place => place.id === placeId);
+
+    let place;
+    try {
+        //const place = Dummy_Places.find( place => place.id === placeId);
+        place = await PlaceModal.findById(placeId);
+    } catch (error) {
+        const err = new HttpError("Something went wrong while searching place", 500);
+        return next(err);
+    }
 
     if(!place){
         // res.status(404).json({message : "Could not provide place to given id"})
@@ -85,10 +95,11 @@ export const getPlacesById = (req, res, next) => {
 
         //3rd way of handling error
 
-        throw new HttpError("Could not provide place to given place id", 404);
+        const err =  new HttpError("Could not provide place to given place id", 404);
+        return next(err);
     }
 
-    res.json({place});
+    res.json({place : place.toObject({getters : true})});
 };
 
 export const getPlacesByUserId = (req, res, next) => {
