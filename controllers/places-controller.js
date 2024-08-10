@@ -217,13 +217,21 @@ export const updatePlace = async (req, res, next) => {
     res.status(200).json({place : place.toObject({getters : true})});
 };
 
-export const deletePlace = (req, res, next) => {
+export const deletePlace = async (req, res, next) => {
     const placeId = req.params.pid
 
-    if(!Dummy_Places.find(place => place.id === placeId)){
-        throw new HttpError("Could not find place for the given Id", 404);
+    // if(!Dummy_Places.find(place => place.id === placeId)){
+    //     throw new HttpError("Could not find place for the given Id", 404);
+    // }
+    // Dummy_Places = Dummy_Places.filter(p => p.id !== placeId);
+    let place;
+
+    try {
+        await PlaceModal.findByIdAndDelete(placeId);
+    } catch (error) {
+        const err = new HttpError("Some issue while deleting the place", 500);
+        return next(err);
     }
-    Dummy_Places = Dummy_Places.filter(p => p.id !== placeId);
 
     res.status(200).json({message : "Deleted place."})
 }
