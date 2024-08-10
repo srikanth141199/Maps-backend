@@ -2,6 +2,7 @@ import { validationResult } from "express-validator";
 import HttpError from "../models/http-error.js";
 import {v4 as uuidv4} from "uuid";
 import { getCoordsForAddress } from "../util/location.js";
+import { PlaceModal } from "../models/place.js";
 
 let Dummy_Places = [
     {
@@ -125,16 +126,32 @@ export const createPlace = async (req, res, next) => {
         return next(error);
     }
 
-    const createdPlace = {
-        id: uuidv4(),
-        title : title,
-        description : description,
-        location : coordinates,
-        address : address,
-        creator : creator
-    };
+    // const createdPlace = {
+    //     id: uuidv4(),
+    //     title : title,
+    //     description : description,
+    //     location : coordinates,
+    //     address : address,
+    //     creator : creator
+    // };
 
-    Dummy_Places.push(createdPlace);
+    const createdPlace = new PlaceModal({
+        title,
+        description,
+        address,
+        location : coordinates,
+        image : "https://upload.wikimedia.org/wikipedia/commons/8/8e/Empire_State_Building_cropped.jpg",
+        creator
+    })
+
+    try {
+        
+        //Dummy_Places.push(createdPlace);
+        await createdPlace.save();
+    } catch (err) {
+        const error = new HttpError("creating location failed", 500);
+        return next(error);
+    }
 
     res.status(201).json({place : createdPlace});
 }
