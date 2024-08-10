@@ -176,7 +176,7 @@ export const createPlace = async (req, res, next) => {
     res.status(201).json({place : createdPlace});
 }
 
-export const updatePlace = (req, res, next) => {
+export const updatePlace = async (req, res, next) => {
 
     const error = validationResult(req);
 
@@ -188,14 +188,33 @@ export const updatePlace = (req, res, next) => {
     const {title, description} = req.body;
     const placeId = req.params.pid;
 
-    const updatedPlace = {...Dummy_Places.find( place => place.id === placeId)};
-    const placeIndex = Dummy_Places.findIndex(p => p.id === placeId);
-    updatedPlace.title = title;
-    updatedPlace.description = description;
+    let place;
 
-    Dummy_Places[placeIndex] = updatedPlace;
+    try {
+        
+       // updatedPlace = {...Dummy_Places.find( place => place.id === placeId)};
+       //placeIndex = Dummy_Places.findIndex(p => p.id === placeId);
 
-    res.status(200).json({place : updatedPlace});
+       place = await PlaceModal.findById(placeId);
+
+    } catch (error) {
+        const err = new HttpError("There is issue while updating the Place, Please try after sometime.", 500);
+        return next(err);
+    }
+
+    place.title = title;
+    place.description = description;
+
+    //Dummy_Places[placeIndex] = updatedPlace;
+
+    try {
+        await place.save();
+    } catch (error) {
+        const err = new HttpError("There is issue while updating the Place, Please try after sometime.", 500);
+        return next(err);
+    }
+
+    res.status(200).json({place : place.toObject({getters : true})});
 };
 
 export const deletePlace = (req, res, next) => {
