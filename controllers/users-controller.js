@@ -22,7 +22,7 @@ export const signup = async (req, res,next) => {
         console.log(error);
         return next(new HttpError("Invalid Input", 422));
     }
-    const {name, email, password, places} = req.body;
+    const {name, email, password} = req.body;
 
     //const hadUser = Dummy_Users.find(user => user.email === email);
     let existingUser
@@ -57,7 +57,7 @@ export const signup = async (req, res,next) => {
         email,
         image : "https://ih1.redbubble.net/image.5068742496.8109/bg,f8f8f8-flat,750x,075,f-pad,750x1000,f8f8f8.jpg",
         password,
-        places
+        places : []
     });
 
     try {
