@@ -43,18 +43,19 @@ export const getPlacesById = async (req, res, next) => {
 
 export const getPlacesByUserId = async (req, res, next) => {
     const userId = req.params.uid;
-    let places;
-
+    //let places;
+    let usersWithPlaces
     try {
         //const places = Dummy_Places.filter(ele => ele.creator === userId);
-        places = await PlaceModal.find({creator : userId})
+        //places = await PlaceModal.find({creator : userId})
+        usersWithPlaces = await userModel.findById(userId).populate("places");
         
     } catch (error) {
         const err = new HttpError("Something went wrong while fetching the data using user Id", 500);
         return next(err);
     }
 
-    if(!places || places.length === 0){
+    if(!usersWithPlaces || usersWithPlaces.places.length === 0){
         // res.status(404).json({message : "Could not provide place to given user id"})
         // return;
 
@@ -64,7 +65,7 @@ export const getPlacesByUserId = async (req, res, next) => {
 
         return next(new HttpError("Could not provide place to given user id", 404))
     }
-    res.json({places : places.map( place => place.toObject({getters : true}))})
+    res.json({places : usersWithPlaces.places.map( place => place.toObject({getters : true}))})
 }
 
 export const createPlace = async (req, res, next) => {
@@ -186,7 +187,6 @@ export const deletePlace = async (req, res, next) => {
 
     try {
         place = await PlaceModal.findById(placeId).populate("creator");
-        console.log(place);
     } catch (error) {
         const err = new HttpError("Some issue while deleting the place while finding", 500);
         return next(err);
