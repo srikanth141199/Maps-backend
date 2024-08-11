@@ -84,5 +84,5 @@ export const login = async (req, res, next) => {
         return next(new HttpError("Could not Identify User", 401));
     }
 
-    res.status(200).json({message : "User Logged in!!"})
+    res.status(200).json({message : "User Logged in!!", user : identifiedUser.toObject({getters : true})})
 }
