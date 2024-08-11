@@ -1,6 +1,5 @@
 import { validationResult } from "express-validator";
 import HttpError from "../models/http-error.js";
-import {v4 as uuidv4} from "uuid";
 import { getCoordsForAddress } from "../util/location.js";
 import { PlaceModal } from "../models/place.js";
 import { userModel } from "../models/user.js";
