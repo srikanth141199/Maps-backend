@@ -3,69 +3,8 @@ import HttpError from "../models/http-error.js";
 import {v4 as uuidv4} from "uuid";
 import { getCoordsForAddress } from "../util/location.js";
 import { PlaceModal } from "../models/place.js";
-
-let Dummy_Places = [
-    {
-        id: 'p1',
-        title: 'Empire State Building',
-        description: 'One of the most famous buildings in the world',
-        imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/8e/Empire_State_Building_cropped.jpg",
-        address: "20 W 34th St., New York, NY 10001, United States",
-        location: {
-            lat: 40.7484445,
-            lng: -73.9905353
-        },
-        creator : 'u1'
-    },
-    {
-        id: 'p2',
-        title: 'Eiffel Tower',
-        description: 'A wrought-iron lattice tower on the Champ de Mars in Paris, France',
-        imageUrl: "https://upload.wikimedia.org/wikipedia/commons/a/a8/Tour_Eiffel_Wikimedia_Commons.jpg",
-        address: "Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France",
-        location: {
-            lat: 48.8583701,
-            lng: 2.2922926
-        },
-        creator : 'u2'
-    },
-    {
-        id: 'p3',
-        title: 'Colosseum',
-        description: 'An ancient amphitheater in the center of Rome, Italy',
-        imageUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d9/Colosseo_2020.jpg",
-        address: "Piazza del Colosseo, 1, 00184 Roma RM, Italy",
-        location: {
-            lat: 41.8902102,
-            lng: 12.4922309
-        },
-        creator : 'u3'
-    },
-    {
-        id: 'p4',
-        title: 'Great Wall of China',
-        description: 'A series of fortifications made of various materials, located in northern China',
-        imageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6f/The_Great_Wall_of_China_at_Jinshanling-edit.jpg",
-        address: "Huairou, China",
-        location: {
-            lat: 40.4319077,
-            lng: 116.5703749
-        },
-        creator : 'u4'
-    },
-    {
-        id: 'p5',
-        title: 'Sydney Opera House',
-        description: 'A multi-venue performing arts centre in Sydney, Australia',
-        imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/82/Sydney_Opera_House_viewed_from_the_north.jpg",
-        address: "Bennelong Point, Sydney NSW 2000, Australia",
-        location: {
-            lat: -33.8567844,
-            lng: 151.2152967
-        },
-        creator : 'u5'
-    }
-];
+import { userModel } from "../models/user.js";
+import mongoose from "mongoose";
 
 export const getPlaces = async (req, res, next) => {
 
@@ -162,12 +101,31 @@ export const createPlace = async (req, res, next) => {
         location : coordinates,
         image : "https://upload.wikimedia.org/wikipedia/commons/8/8e/Empire_State_Building_cropped.jpg",
         creator
-    })
+    });
+
+    let user;
+    try {
+        user = await userModel.findById(creator);
+    } catch (error) {
+        const err = new HttpError("Something while creating place failed", 500);
+        return next(err);
+    }
+
+    if(!user){
+        const err = new HttpError("We could not find user for provided Id", 500);
+        return next(err);
+    }
 
     try {
-        
         //Dummy_Places.push(createdPlace);
-        await createdPlace.save();
+        //await createdPlace.save();
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        await createdPlace.save({session : session}); //creating new Place
+        user.places.push(createdPlace);
+        await user.save({session : session}); // adding the place to user places array
+        await session.commitTransaction();
+        session.endSession();
     } catch (err) {
         const error = new HttpError("creating location failed", 500);
         return next(error);
@@ -227,7 +185,27 @@ export const deletePlace = async (req, res, next) => {
     let place;
 
     try {
-        await PlaceModal.findByIdAndDelete(placeId);
+        place = await PlaceModal.findById(placeId).populate("creator");
+        console.log(place);
+    } catch (error) {
+        const err = new HttpError("Some issue while deleting the place while finding", 500);
+        return next(err);
+    }
+
+    if(!place){
+        const err = new HttpError("We could not find place with this id", 404);
+        return next(err);
+    }
+
+    try {
+        //await place.remove();
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        await place.deleteOne({session : session});
+        place.creator.places.pull(place);
+        await place.creator.save({session : session});
+        await session.commitTransaction();
+        session.endSession();
     } catch (error) {
         const err = new HttpError("Some issue while deleting the place", 500);
         return next(err);
