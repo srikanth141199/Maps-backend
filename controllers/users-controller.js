@@ -38,7 +38,7 @@ export const signup = async (req, res,next) => {
     // }
 
     if(existingUser){
-        const error = new HttpError("uSER EXISTS ALREADY", 422);
+        const error = new HttpError("USER EXISTS ALREADY, Please Login!!", 422);
         return next(error);
     }
 
