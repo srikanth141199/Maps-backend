@@ -75,7 +75,7 @@ export const createPlace = async (req, res, next) => {
         return next(new HttpError("Invalid Input", 422));
     }
      
-    const {title, description, imageUrl, address, creator} = req.body;
+    const {title, description, address, creator} = req.body;
 
     let coordinates;
 
@@ -99,7 +99,7 @@ export const createPlace = async (req, res, next) => {
         description,
         address,
         location : coordinates,
-        image : "https://upload.wikimedia.org/wikipedia/commons/8/8e/Empire_State_Building_cropped.jpg",
+        image : req.file.path,
         creator
     });
 
