@@ -54,7 +54,7 @@ export const signup = async (req, res,next) => {
     const newUser = new userModel({
         name,
         email,
-        image : "https://ih1.redbubble.net/image.5068742496.8109/bg,f8f8f8-flat,750x,075,f-pad,750x1000,f8f8f8.jpg",
+        image : req.file.path,
         password,
         places : []
     });
