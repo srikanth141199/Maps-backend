@@ -4,6 +4,7 @@ import { getCoordsForAddress } from "../util/location.js";
 import { PlaceModal } from "../models/place.js";
 import { userModel } from "../models/user.js";
 import mongoose from "mongoose";
+import fs from "fs";
 
 export const getPlaces = async (req, res, next) => {
 
@@ -196,6 +197,8 @@ export const deletePlace = async (req, res, next) => {
         return next(err);
     }
 
+    const imagePath = place.image;
+
     try {
         //await place.remove();
         const session = await mongoose.startSession();
@@ -209,6 +212,10 @@ export const deletePlace = async (req, res, next) => {
         const err = new HttpError("Some issue while deleting the place", 500);
         return next(err);
     }
+
+    fs.unlink(imagePath, (err )=> {
+        console.log(err);        
+    })
 
     res.status(200).json({message : "Deleted place."})
 }
