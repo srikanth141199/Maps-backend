@@ -202,7 +202,7 @@ export const deletePlace = async (req, res, next) => {
         return next(err);
     }
 
-    if(place.creator.toString() !== req.userData.userId){
+    if(place.creator.id !== req.userData.userId){
         const err = new HttpError("You are not authorized to perform this action", 401);
         return next(err);
     }
