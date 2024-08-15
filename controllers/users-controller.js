@@ -2,6 +2,9 @@ import HttpError from "../models/http-error.js";
 import { validationResult } from "express-validator";
 import { userModel } from "../models/user.js";
 
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken"
+
 export const getUsers = async (req, res, next) => {
     let users;
     try {
@@ -51,11 +54,20 @@ export const signup = async (req, res,next) => {
 
     //Dummy_Users.push(newUser);
 
+    let hashedPassword;
+
+    try {
+        hashedPassword = await bcrypt.hash(password, 12);
+    } catch (error) {
+        const err = new HttpError("User can not be created", 500);
+        return next(err);
+    }
+
     const newUser = new userModel({
         name,
         email,
         image : req.file.path,
-        password,
+        password : hashedPassword,
         places : []
     });
 
@@ -65,24 +77,77 @@ export const signup = async (req, res,next) => {
         const err = new HttpError("Some issue while SignUp!!", 500);
         return next(err);
     }
-    res.status(201).json({user : newUser.toObject({getters : true})});
+
+    let token;
+
+    try {
+      token = jwt.sign(
+        { userId: newUser.id, email: newUser.email },
+        "BGX6HGtINpxNxvp",
+        { expiresIn: "1h" }
+      );
+    } catch (error) {
+      const err = new HttpError("Some issue while SignUp!!", 500);
+      return next(err);
+    }
+
+    res
+      .status(201)
+      .json({
+        userId: newUser.id,
+        email: newUser.email,
+        token: token,
+      });
 };
 
 export const login = async (req, res, next) => {
-    const {email, password} = req.body;
+  const { email, password } = req.body;
 
-    let identifiedUser
-    try {
-        
-        identifiedUser = await userModel.findOne({email : email});
-    } catch (error) {
-        const err = new HttpError("Something went wrong while Login!!", 500);
-        return next(err);
-    }
+  let identifiedUser;
+  try {
+    identifiedUser = await userModel.findOne({ email: email });
+  } catch (error) {
+    const err = new HttpError("Something went wrong while Login!!", 500);
+    return next(err);
+  }
 
-    if(!identifiedUser || identifiedUser.password !== password ){
-        return next(new HttpError("Could not Identify User", 401));
-    }
+  if (!identifiedUser) {
+    return next(new HttpError("Could not Identify User", 401));
+  }
 
-    res.status(200).json({message : "User Logged in!!", user : identifiedUser.toObject({getters : true})})
+  let isValidPassword = false;
+
+  try {
+    isValidPassword = await bcrypt.compare(password, identifiedUser.password);    
+  } catch (error) {
+    const err = new HttpError("Sorry Password is wrong!!", 500);
+    return next(err);
+  }
+
+  if (!isValidPassword) {
+    const err = new HttpError("Password is wrong!!", 500);
+    return next(err);
+  }
+
+  //JSON web token generation starts
+  let token;
+
+  try {
+    token = jwt.sign(
+      { userId: identifiedUser.id, email: identifiedUser.email },
+      "BGX6HGtINpxNxvp",
+      { expiresIn: "1h" }
+    );
+  } catch (error) {
+    const err = new HttpError("Some issue while Login!!", 500);
+    return next(err);
+  }
+
+  res
+    .status(200)
+    .json({
+      userId: identifiedUser.id,
+      email: identifiedUser.email,
+      token: token,
+    });
 }

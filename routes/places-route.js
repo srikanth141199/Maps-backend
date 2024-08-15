@@ -2,6 +2,7 @@ import express from "express";
 import { createPlace, deletePlace, getPlacesByUserId, getPlacesById, updatePlace, getPlaces } from "../controllers/places-controller.js";
 import { check } from "express-validator";
 import { fileUpload } from "../middleware/file-upload.js";
+import checkAuth from "../middleware/check-auth.js";
 
 
 
@@ -17,6 +18,8 @@ router.get("/", (req, res, next) => {
 router.get("/:pid", getPlacesById)
 
 router.get("/user/:uid", getPlacesByUserId);
+
+router.use(checkAuth);
 
 router.post(
   "/",
