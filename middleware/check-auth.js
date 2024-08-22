@@ -11,7 +11,7 @@ const checkAuth = (req, res, next) => {
       throw new Error("Issue with Token");
     };
 
-    const decodedToken = jwt.verify(token, "BGX6HGtINpxNxvp");
+    const decodedToken = jwt.verify(token, process.env.JWT_KEY);
     req.userData = {userId : decodedToken.userId};
     next();
 

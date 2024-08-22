@@ -7,7 +7,8 @@ import path from "path";
 import PlacesRouters from "./routes/places-route.js";
 import UserRouters from "./routes/users-route.js";
 import HttpError from "./models/http-error.js";
-
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 
@@ -44,13 +45,14 @@ app.use((error, req, res, next) => {
 })
 
 mongoose
-  .connect("mongodb+srv://kolleparasrikanth:Srikanth5359$@ecomdb.ndaljpt.mongodb.net/mernMaps")
+  .connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@ecomdb.ndaljpt.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`)
   .then(() => {
     app.listen(5000, () => {
-      console.log("app is listening in port 5000");
+      console.log("App is listening on port 5000");
     });
   })
   .catch(err => {
     console.log(err);
   });
+
 

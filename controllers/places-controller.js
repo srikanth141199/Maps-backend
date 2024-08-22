@@ -83,6 +83,7 @@ export const createPlace = async (req, res, next) => {
     try {
         coordinates = await getCoordsForAddress(address);     
     } catch (error) {
+        console.log(error)
         return next(error);
     }
 
@@ -95,6 +96,7 @@ export const createPlace = async (req, res, next) => {
     //     creator : creator
     // };
 
+    console.log(coordinates);
     const createdPlace = new PlaceModal({
         title,
         description,

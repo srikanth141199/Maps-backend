@@ -1,7 +1,7 @@
 import axios from "axios";
 import HttpError from "../models/http-error.js";
 
-const API_KEY = "AIzaSyCKL-yy1DkmaR8ugaIXEfbWlcAdTGrkN_0";
+const API_KEY = process.env.GOOGLE_API_KEY;
 
 export async function getCoordsForAddress(address) {
   const response = await axios.get(
